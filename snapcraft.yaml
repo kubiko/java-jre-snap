@@ -1,0 +1,30 @@
+name: java-jre-ondra
+version: "8.0.X"
+summary: java 8 runtime snap
+description: |
+ Java 8 run time snap, this snap is intented to be used by other snap_fileset
+ using content interface
+
+confinement: strict
+grade: stable
+
+slots:
+  jre:
+    interface: content
+    read:
+      - $SNAP
+
+apps:
+    set-jre:
+        command: echo "JAVA_HOME=$JAVA_HOME"
+
+parts:
+    # java run time
+    jre:
+        plugin: zulu-jre
+        # zulu supported arcghitectures(armhf, amd64) are already handled by plugin itself
+        # define here overide for pluging's defaults, or to add additional architectures
+        # architectures: armhf, armel, arm64, amd64, i386
+        # example overide:
+        # zulu:
+        #     amd64: https://www.azul.com/downloads/zulu/zdk-8-ga-linux_x64.tar.gz
