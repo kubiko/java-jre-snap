@@ -1,9 +1,10 @@
 name: java-jre-ondra
-version: "8.0.X"
+version: "8.19.0.1"
 summary: java 8 runtime snap
 description: |
  Java 8 run time snap, this snap is intented to be used by other snap_fileset
  using content interface
+ for amd64 java runtime is provided by zulu
 
 confinement: strict
 grade: stable
