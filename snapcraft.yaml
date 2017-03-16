@@ -15,8 +15,8 @@ slots:
       - $SNAP
 
 apps:
-    set-jre:
-        command: echo "JAVA_HOME=$JAVA_HOME"
+    info:
+        command: print-info
 
 parts:
     # java run time
@@ -28,3 +28,11 @@ parts:
         # example overide:
         # zulu:
         #     amd64: https://www.azul.com/downloads/zulu/zdk-8-ga-linux_x64.tar.gz
+
+    info:
+        plugin: dump
+        source: snap
+        stage:
+          - -plugins
+        prime:
+          - -plugins
