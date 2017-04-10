@@ -1,5 +1,5 @@
 name: java-jre-ondra
-version: "8_8u121-b13"
+version: "8-8u121-b13"
 summary: java 8 runtime snap
 description: |
  Java 8 run time snap, this snap is intented to be used by other snap_fileset
