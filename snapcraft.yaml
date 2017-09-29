@@ -1,5 +1,7 @@
 name: java-jre-ondra
-version: "8.0.X"
+version: "8u131-b11-2ubuntu1.17.04.3"
+version-script: |
+   echo $(find parts/jre/ubuntu/download/ -name "openjdk-8-jre_*_amd64.deb" | awk -F  "/" '{print $5}' | awk -F  "_" '{print $2}')
 summary: java 8 runtime snap
 description: |
  Java 8 run time snap, this snap is intented to be used by other snap_fileset
@@ -14,6 +16,10 @@ slots:
     read:
       - $SNAP
 
+environment:
+  JAVA_HOME: ${SNAP}/usr/lib/jvm/java-8-openjdk-${SNAP_ARCH}
+  PATH: ${SNAP}/usr/lib/jvm/java-8-openjdk-${SNAP_ARCH}/bin:$PATH
+
 apps:
     info:
         command: print-info
@@ -21,18 +27,9 @@ apps:
 parts:
     # java run time
     jre:
-        plugin: zulu-jre
-        # zulu supported architectures(armhf, amd64) are already handled by plugin itself
-        # define here overide for pluging's defaults, or to add additional architectures
-        # architectures: armhf, armel, arm64, amd64, i386
-        # example overide:
-        # zulu:
-        #     amd64: https://www.azul.com/downloads/zulu/zdk-8-ga-linux_x64.tar.gz
-
+        plugin: nil
+        stage-packages:
+          - openjdk-8-jre
     info:
         plugin: dump
         source: snap
-        stage:
-          - -plugins
-        prime:
-          - -plugins
