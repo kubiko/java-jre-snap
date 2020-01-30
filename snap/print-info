@@ -1,5 +1,0 @@
-#!/bin/sh
-
-grep 'JAVA_HOME' -r $SNAP/*.wrapper | sed 's/export //g'
-grep 'export PATH' -r $SNAP/*.wrapper | grep -v 'usr/sbin' | sed 's/export //g'
-java -version
