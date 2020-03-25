@@ -36,23 +36,42 @@ parts:
     jre:
         plugin: nil
         override-pull: |
-          wget -O index.html https://www.azul.com/downloads/zulu-community
-          grep "JSON.stringify(sortArray(" index.html | sed -e "s/localStorage.setItem('arrayZuluBandlesZulu', JSON.stringify(sortArray(//g" -e "s/)));//g" > index.json
           echo "SNAPCRAFT_ARCH_TRIPLET=${SNAPCRAFT_ARCH_TRIPLET}"
           if [ "${SNAPCRAFT_ARCH_TRIPLET}" = "arm-linux-gnueabihf" ]; then
-              jq -c 'sort_by(.zulu_version) | .[] | select( .arch == "ARM 32-bit HF" ) | select( .category == "Java 8 (LTS)" ) | select( .arch_slug = "arm-32-bit-hf" ) | select( .packaging_slug == "jdk" ) | select(.os|index( "Linux" ))' index.json | jq -sr '.[-1]' > ${SNAPCRAFT_PART_INSTALL}/zulu_version.json
+              curl -H "Accept: application/json" "https://api.azul.com/zulu/download/community/v1.0/bundles/?zulu_version=8&ext=tar.gz&os=linux&arch=arm&hw_bitness=32&bundle_type=jdk" | jq -c 'sort_by(.id) | .[] | select(.name | contains("aarch32hf"))' | jq -s '.[-1]' > ${SNAPCRAFT_PART_INSTALL}/zulu_version.json
           elif [ "${SNAPCRAFT_ARCH_TRIPLET}" = "aarch64-linux-gnu" ]; then
-              jq -c 'sort_by(.zulu_version) | .[] | select( .arch == "ARM 64-bit" ) | select( .category == "Java 8 (LTS)" ) | select( .arch_slug = "arm-64-bit" ) | select( .packaging_slug == "jdk" ) | select(.os|index( "Linux" ))' index.json | jq -sr '.[-1]' > ${SNAPCRAFT_PART_INSTALL}/zulu_version.json
+              curl -H "Accept: application/json" "https://api.azul.com/zulu/download/community/v1.0/bundles/latest/?zulu_version=8&ext=tar.gz&os=linux&arch=arm&hw_bitness=64&bundle_type=jdk" | jq . > ${SNAPCRAFT_PART_INSTALL}/zulu_version.json
           elif [ "${SNAPCRAFT_ARCH_TRIPLET}" = "x86_64-linux-gnu" ]; then
-              jq -c 'sort_by(.zulu_version) | .[] | select( .arch == "x86 64-bit" ) | select( .category == "Java 8 (LTS)" ) | select( .arch_slug = "x86-64-bit" ) | select( .packaging_slug == "jdk" ) | select(.os|index( "Linux" ))' index.json | jq -sr '.[-1]' > ${SNAPCRAFT_PART_INSTALL}/zulu_version.json
+              curl -H "Accept: application/json" "https://api.azul.com/zulu/download/community/v1.0/bundles/latest/?zulu_version=8&ext=tar.gz&os=linux&arch=x86&hw_bitness=64&bundle_type=jdk" | jq . > ${SNAPCRAFT_PART_INSTALL}/zulu_version.json
           else
-              jq -c 'sort_by(.zulu_version) | .[] | select( .arch == "x86 32-bit" ) | select( .category == "Java 8 (LTS)" ) | select( .arch_slug = "x86-32-bit" ) | select( .packaging_slug == "jdk" ) | select(.os|index( "Linux" ))' index.json | jq -sr '.[-1]' > ${SNAPCRAFT_PART_INSTALL}/zulu_version.json
+              curl -H "Accept: application/json" "https://api.azul.com/zulu/download/community/v1.0/bundles/latest/?zulu_version=8&ext=tar.gz&os=linux&arch=x86&hw_bitness=32&bundle_type=jdk" | jq . > ${SNAPCRAFT_PART_INSTALL}/zulu_version.json
           fi
-          tar_link=$(jq -r '.bundles[] | select (.extension == "tar.gz") | .link' ${SNAPCRAFT_PART_INSTALL}/zulu_version.json )
+          tar_link=$(jq -r '.url' ${SNAPCRAFT_PART_INSTALL}/zulu_version.json)
+          echo "tar_link=[${tar_link}]"
           wget -O zulu.tar.gz ${tar_link}
           tar -C ${SNAPCRAFT_PART_INSTALL} -xf zulu.tar.gz --strip 1
-          VERSION=$(grep JAVA_VERSION ${SNAPCRAFT_PART_INSTALL}/release | sed 's/.*="\(.*\)"/\1/' | sed 's/_/-/g' )
-          snapcraftctl set-version ${VERSION}
+          version=$(grep JAVA_VERSION ${SNAPCRAFT_PART_INSTALL}/release | sed 's/.*="\(.*\)"/\1/' | sed 's/_/-/g' )
+          echo "version=${version}"
+          snapcraftctl set-version ${version}
+        stage-packages:
+          - libcairo2
+          - libdatrie1
+          - libfontconfig1
+          - libgdk-pixbuf2.0-0
+          - libgl1
+          - libglvnd0
+          - libglx0
+          - libgraphite2-3
+          - libharfbuzz0b
+          - libpango-1.0-0
+          - libpangocairo-1.0-0
+          - libpangoft2-1.0-0
+          - libpixman-1-0
+          - libpng16-16
+          - libthai0
+          - libxcb-render0
+          - libxcb-shm0
+          - libxxf86vm1
         stage:
           - -bin
           - -demo
@@ -66,8 +85,6 @@ parts:
         organize:
           LICENSE: LICENSE_ZULU
           release: release_zulu
-        build-packages:
-          - jq
 
     dependencies:
         plugin: nil
@@ -86,4 +103,6 @@ parts:
         source: glue
 
 build-packages:
+    - jq
+    - curl
     - wget
